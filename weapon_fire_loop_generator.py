@@ -281,7 +281,7 @@ class WeaponFireLoopGenerator:
     def play_audio(self, audio):
         self.export_audio_segment(self.current_loop_settings.target_path, audio, "preview_temp")
         path = self.current_loop_settings.target_path + "\\preview_temp.wav"
-        log_path = path if len(path) < 40 else path[:5] + "..." + path[-46:] # prevent overflow 
+        log_path = path if len(path) < 44 else path[:5] + "..." + path[-35:] # prevent overflow 
         self.log("Playback " + log_path, True)
         winsound.PlaySound(path, winsound.SND_FILENAME)
         self.log("Ready", True)
@@ -289,7 +289,7 @@ class WeaponFireLoopGenerator:
     def export_audio_segment(self, path, audio_segment, name):
         target_file = path + "\\" + name + ".wav"
         audio_segment.export(target_file, format="wav")
-        log_path = target_file if len(target_file) < 35 else target_file[:5] + "..." + target_file[-41:] # prevent overflow 
+        log_path = target_file if len(target_file) < 44 else target_file[:5] + "..." + target_file[-35:] # prevent overflow
         self.log("Exported: " + log_path)
 
     def play_current_loop_sample(self):
