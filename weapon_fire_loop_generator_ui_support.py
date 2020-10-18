@@ -181,7 +181,7 @@ def update_loop_settings_view():
     checkMonoTail.set(int(settings.mono_tail))
     
     directory = instance.current_loop_settings.target_path
-    labelTargetDirectory.set(directory if len(directory) < 58 else directory[:10] + "..." + directory[-44:]) # prevent overflow 
+    labelTargetDirectory.set(WeaponFireLoopGenerator.prevent_overflow(directory, 54)) # prevent overflow 
 
 def update_loop_settings():
     if spinboxFireCount.get().isnumeric():  
@@ -220,7 +220,7 @@ def update_sample_list_ui():
     i = 0
     w.SourceFilesList.delete(0, 99999999)
     for sample in samples:
-        sample_path = sample.path if len(sample.path) < 70 else sample.path[:12] + "..." + sample.path[-54:] # prevent overflow 
+        sample_path = WeaponFireLoopGenerator.prevent_overflow(sample.path, 66) # prevent overflow 
         w.SourceFilesList.insert(i, sample_path)
         i = i + 1
     if len(samples) > 0:

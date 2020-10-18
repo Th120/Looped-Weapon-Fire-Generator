@@ -23,6 +23,10 @@ class WeaponFireLoopGenerator:
     def create(log_callback):
         return WeaponFireLoopGenerator(log_callback)
 
+    @staticmethod
+    def prevent_overflow(text, max_width, left_width=5):
+        return text if len(text) <= max_width else text[:left_width] + "..." + text[left_width-max_width:]
+
     def open_files(self, paths):
         self.sample_manager.load_files(paths)
         
@@ -99,11 +103,10 @@ class WeaponFireLoopGenerator:
         mix = AudioSegment.silent(duration=total_length)
 
         offset = 0
-        i = 0
         for sample in raw_sequence:
             mix = mix.overlay(sample, position=offset)
             offset = offset + time_between_ms
-            i = i + 1
+
             
         max_old = mix.max_dBFS
 
@@ -281,15 +284,15 @@ class WeaponFireLoopGenerator:
     def play_audio(self, audio):
         self.export_audio_segment(self.current_loop_settings.target_path, audio, "preview_temp")
         path = self.current_loop_settings.target_path + "\\preview_temp.wav"
-        log_path = path if len(path) < 44 else path[:5] + "..." + path[-35:] # prevent overflow 
+        log_path = WeaponFireLoopGenerator.prevent_overflow(path, 44) # prevent overflow 
         self.log("Playback " + log_path, True)
         winsound.PlaySound(path, winsound.SND_FILENAME)
-        self.log("Ready", True)
+        self.log("Ready", True)  
 
     def export_audio_segment(self, path, audio_segment, name):
         target_file = path + "\\" + name + ".wav"
         audio_segment.export(target_file, format="wav")
-        log_path = target_file if len(target_file) < 44 else target_file[:5] + "..." + target_file[-35:] # prevent overflow
+        log_path = WeaponFireLoopGenerator.prevent_overflow(target_file, 44) # prevent overflow
         self.log("Exported: " + log_path)
 
     def play_current_loop_sample(self):
