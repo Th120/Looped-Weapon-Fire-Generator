@@ -181,7 +181,7 @@ def update_loop_settings_view():
     checkMonoTail.set(int(settings.mono_tail))
     
     directory = instance.current_loop_settings.target_path
-    labelTargetDirectory.set(directory if len(directory) < 62 else directory[:12] + "..." + directory[-46:]) # prevent overflow 
+    labelTargetDirectory.set(directory if len(directory) < 58 else directory[:10] + "..." + directory[-44:]) # prevent overflow 
 
 def update_loop_settings():
     if spinboxFireCount.get().isnumeric():  
@@ -248,14 +248,16 @@ def playTailSampleButton(p1):
     instance.play_current_tail_sample()
 
 def regeneratePreviewBurstButton(p1):
-   instance.render_preview_burst()
-   maxVolumePreview.set(round(instance.current_preview.max_dBFS, 2))
-   avgVolumePreview.set(round(instance.current_preview.dBFS, 2))
+    instance.render_preview_burst()
+    if instance.current_preview:
+        maxVolumePreview.set(round(instance.current_preview.max_dBFS, 2))
+        avgVolumePreview.set(round(instance.current_preview.dBFS, 2))
 
 def regeneratePreviewLoopButton(p1):
     instance.render_preview_loop()
-    maxVolumePreview.set(round(instance.current_preview.max_dBFS, 2))
-    avgVolumePreview.set(round(instance.current_preview.dBFS, 2))
+    if instance.current_preview:
+        maxVolumePreview.set(round(instance.current_preview.max_dBFS, 2))
+        avgVolumePreview.set(round(instance.current_preview.dBFS, 2))
 
 def reloadAllSamplesButton(p1):
     instance.reload_samples()

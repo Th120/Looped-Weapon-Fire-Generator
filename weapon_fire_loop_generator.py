@@ -245,18 +245,20 @@ class WeaponFireLoopGenerator:
         self.log("Ready", True)
 
     def render_preview_burst(self):
-        self.log("Rendering preview burst ...", True)
-        seed = self.current_loop_settings.seed
-        bursts = self.generate_sequences(True, seed)
-        self.current_preview = bursts[0][0]
-        self.log("Ready", True)
+        if len(self.sample_manager.get_samples_list()) > 0:
+            self.log("Rendering preview burst ...", True)
+            seed = self.current_loop_settings.seed
+            bursts = self.generate_sequences(True, seed)
+            self.current_preview = bursts[0][0]
+            self.log("Ready", True)
 
     def render_preview_loop(self):
-        self.log("Rendering preview loop ...", True)
-        seed = self.current_loop_settings.seed
-        bursts = self.generate_sequences(False, seed)
-        self.current_preview = bursts[0][0]
-        self.log("Ready", True)
+        if len(self.sample_manager.get_samples_list()) > 0:
+            self.log("Rendering preview loop ...", True)
+            seed = self.current_loop_settings.seed
+            bursts = self.generate_sequences(False, seed)
+            self.current_preview = bursts[0][0]
+            self.log("Ready", True)
     
     def play_preview(self):
         if self.current_preview:
@@ -279,14 +281,16 @@ class WeaponFireLoopGenerator:
     def play_audio(self, audio):
         self.export_audio_segment(self.current_loop_settings.target_path, audio, "preview_temp")
         path = self.current_loop_settings.target_path + "\\preview_temp.wav"
-        self.log("Playback " + path, True)
+        log_path = path if len(path) < 40 else path[:5] + "..." + path[-46:] # prevent overflow 
+        self.log("Playback " + log_path, True)
         winsound.PlaySound(path, winsound.SND_FILENAME)
         self.log("Ready", True)
 
     def export_audio_segment(self, path, audio_segment, name):
         target_file = path + "\\" + name + ".wav"
         audio_segment.export(target_file, format="wav")
-        self.log("Exported: " + target_file)
+        log_path = target_file if len(target_file) < 35 else target_file[:5] + "..." + target_file[-41:] # prevent overflow 
+        self.log("Exported: " + log_path)
 
     def play_current_loop_sample(self):
         if self.current_sample:
