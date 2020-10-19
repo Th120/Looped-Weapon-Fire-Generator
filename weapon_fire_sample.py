@@ -10,7 +10,7 @@ DEFAULT_LOOP_FADOUT_LENGTH_MS = 48
 DEFAULT_TAIL_OFFSET_MS = 36
 DEFAULT_TAIL_FADEIN_MS = 30
 STRIP_SILENCE_THRESHOLD = -72
-MAX_SILENCE_LENGTH = 240
+MAX_SILENCE_LENGTH = 111
 SILENCE = -120
 
 class WeaponFireSample:
@@ -105,20 +105,20 @@ class WeaponFireSample:
     def render_default(self, mono, seed, skip_pitch=False):
         default = self.source_sound
 
+        default = normalize(default, abs(self.headroom))
+
         if mono:
             default = default.set_channels(1)
-
-        default = normalize(default, abs(self.headroom))
 
         return self.process_render(default, seed, skip_pitch)
 
     def render_tail(self, mono, seed):
         tail = self.source_sound
 
+        tail = normalize(tail, abs(self.headroom))
+
         if mono:
             tail = tail.set_channels(1)
-
-        tail = normalize(tail, abs(self.headroom))
 
         if self.tail_offset_ms > 0 and self.tail_fadein_ms > 0:
             offset = -numpy.clip(len(tail) - self.tail_offset_ms, 0, len(tail))
@@ -130,10 +130,10 @@ class WeaponFireSample:
     def render_looped(self, mono, seed):
         looped = self.source_sound
 
+        looped = normalize(looped, abs(self.headroom))
+
         if mono:
             looped = looped.set_channels(1)
-        
-        looped = normalize(looped, abs(self.headroom))
         
         if self.loop_fadeout_start_ms > 0 and self.loop_fadeout_length_ms > 0:
             looped = looped.fade(to_gain=SILENCE, start=self.loop_fadeout_start_ms, duration=self.loop_fadeout_length_ms)

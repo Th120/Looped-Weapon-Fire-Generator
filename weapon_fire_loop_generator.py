@@ -71,9 +71,11 @@ class WeaponFireLoopGenerator:
         
         raw_sequences = []
 
-        state = " - Burst ..." if is_burst else " - Auto ..."
+        state = " - Burst " if is_burst else " - Auto "
 
-        self.log("Generating variations" + state, True)
+        mono_str = "mono" if self.current_loop_settings.mono_loop else "default"
+
+        self.log("Generating variations" + state + "(" + mono_str + ") ...", True)
 
         for i in range(variations):
             raw_sequences.append((self.generate_list_sequence(count), None))
@@ -82,7 +84,7 @@ class WeaponFireLoopGenerator:
 
         avg_boost = 0.0
 
-        self.log("Mixing audio" + state, True)
+        self.log("Mixing audio" + state + "(" + mono_str + ") ...", True)
 
         for raw in raw_sequences:
             render = self.mix_sequence(raw[0], rpm)
@@ -204,46 +206,74 @@ class WeaponFireLoopGenerator:
             shutil.rmtree(path)  
         os.mkdir(path)
 
+        self.export_with(False)
+        self.export_with(True)
+
+    
+    def export_with(self, mono):
+        old_mono_loop = self.current_loop_settings.mono_loop
+        old_mono_tail = self.current_loop_settings.mono_tail
+
+        self.current_loop_settings.mono_loop = mono
+        self.current_loop_settings.mono_tail = mono
+
+        try:
+            self.export_sounds()
+        except Exception as e:
+            self.current_loop_settings.mono_loop = old_mono_loop
+            self.current_loop_settings.mono_tail = old_mono_tail
+            self.log("Exception while rendering (further information within the log)", True)
+            raise e
+        
+        self.current_loop_settings.mono_loop = old_mono_loop
+        self.current_loop_settings.mono_tail = old_mono_tail
+
+    def export_sounds(self):
+        prefix = self.current_loop_settings.prefix
+        path = self.current_loop_settings.target_path + "\\" + prefix + "\\render"
+
         variations = self.current_loop_settings.variations
 
         seed = self.current_loop_settings.seed
 
-        self.log("Generating sounds ...", True)
-        self.log("Rendering defaults ...", True)
+        mono_str = "mono" if self.current_loop_settings.mono_loop else "default"
+
+        self.log("Generating sounds (" + mono_str + ") ...", True)
+        self.log("Rendering defaults (" + mono_str + ") ...", True)
         defaults = list(map(lambda x: x.render_default(False, 0, True), self.sample_manager.get_samples_list()))
-        self.log("Rendering tails ...", True)
+        self.log("Rendering tails (" + mono_str + ") ...", True)
         tails = self.generate_tails(variations, seed)
-        self.log("Rendering bursts ...", True)
+        self.log("Rendering bursts (" + mono_str + ") ...", True)
         bursts = self.generate_sequences(True, seed, variations)[0] # make sure burst and are not the same partially
-        self.log("Rendering loops ...", True)
+        self.log("Rendering loops (" + mono_str + ") ...", True)
         loops = self.generate_sequences(False, seed * 1000, variations)
 
         volume_boost_loop = loops[1]
 
         if volume_boost_loop > 0:
-            self.log("Adjusting volumes (tails, defaults) ...", True)
+            self.log("Adjusting volumes (tails, defaults) (" + mono_str + ") ...", True)
             tails = list(map(lambda tail: tail + min(-tail.max_dBFS - 0.01, volume_boost_loop), tails))
             defaults = list(map(lambda default: default + min(-default.max_dBFS - 0.01, volume_boost_loop), defaults))
 
-        self.log("Exporting files ...", True)
+        self.log("Exporting files (" + mono_str + ") ...", True)
 
         prefix = self.current_loop_settings.prefix
 
-        self.log("Exporting defaults ...", True)
+        self.log("Exporting defaults (" + mono_str + ") ...", True)
         for i in range(len(defaults)):
-            self.export_audio_segment(path, defaults[i], prefix + "_default_" + str(i))
+            self.export_audio_segment(path, defaults[i], prefix + "_default_" + mono_str + "_" + str(i))
 
-        self.log("Exporting tails ...", True)
+        self.log("Exporting tails (" + mono_str + ") ...", True)
         for i in range(len(tails)):
-            self.export_audio_segment(path, tails[i], prefix + "_tail_" + str(i))
+            self.export_audio_segment(path, tails[i], prefix + "_tail_" + mono_str + "_" + str(i))
         
-        self.log("Exporting bursts ...", True)
+        self.log("Exporting bursts (" + mono_str + ") ...", True)
         for i in range(len(bursts)):
-            self.export_audio_segment(path, bursts[i], prefix + "_burst_" + str(i))
+            self.export_audio_segment(path, bursts[i], prefix + "_burst_" + mono_str + "_" + str(i))
 
-        self.log("Exporting loops ...", True)
+        self.log("Exporting loops (" + mono_str + ") ...", True)
         for i in range(len(loops[0])):
-            self.export_audio_segment(path, loops[0][i], prefix + "_loop_" + str(i))
+            self.export_audio_segment(path, loops[0][i], prefix + "_loop_" + mono_str + "_" + str(i))
         
         self.log("Ready", True)
 
