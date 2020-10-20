@@ -8,7 +8,7 @@
 import sys, time
 from weapon_fire_loop_generator import WeaponFireLoopGenerator
 
-from tkinter.filedialog import askopenfile, askopenfiles
+from tkinter.filedialog import askopenfile, askopenfiles, askdirectory
 
 try:
     import Tkinter as tk

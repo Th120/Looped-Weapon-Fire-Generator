@@ -240,7 +240,7 @@ class WeaponFireLoopGenerator:
 
         self.log("Generating sounds (" + mono_str + ") ...", True)
         self.log("Rendering defaults (" + mono_str + ") ...", True)
-        defaults = list(map(lambda x: x.render_default(False, 0, True), self.sample_manager.get_samples_list()))
+        defaults = list(map(lambda x: x.render_default(self.current_loop_settings.mono_loop or self.current_loop_settings.mono_tail, 0, True), self.sample_manager.get_samples_list()))
         self.log("Rendering tails (" + mono_str + ") ...", True)
         tails = self.generate_tails(variations, seed)
         self.log("Rendering bursts (" + mono_str + ") ...", True)
